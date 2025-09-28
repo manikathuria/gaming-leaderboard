@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int           @id @default(autoincrement())
+  username  String        @unique
+  join_date DateTime      @default(now())
+  sessions  GameSession[]
+  leaderboard Leaderboard?  // one-to-one relation (inverse side)
+
+  @@map("users")
+}
+
+model GameSession {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int      @map("user_id")
+  score     Int
+  game_mode String
+  timestamp DateTime @default(now())
+
+  @@index([userId])
+  @@index([timestamp])
+
+  @@map("game_sessions")
+}
+
+model Leaderboard {
+  id          Int    @id @default(autoincrement())
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int    @unique @map("user_id")
+  total_score Int
+  rank        Int?
+
+  @@index([total_score(desc)])
+  @@index([total_score, userId], map: "idx_leaderboard_score_user")
+
+  @@map("leaderboard")
+}

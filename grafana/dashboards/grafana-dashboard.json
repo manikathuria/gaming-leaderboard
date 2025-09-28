@@ -1,0 +1,71 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Heap Memory Used (bytes)",
+      "targets": [
+        {
+          "expr": "nodejs_heap_size_used_bytes",
+          "legendFormat": "Heap Used"
+        },
+        {
+          "expr": "nodejs_heap_size_total_bytes",
+          "legendFormat": "Heap Total"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Garbage Collection Duration (seconds)",
+      "targets": [
+        {
+          "expr": "rate(nodejs_gc_duration_seconds_sum[1m])",
+          "legendFormat": "{{kind}}"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Active Handles",
+      "targets": [
+        {
+          "expr": "nodejs_active_handles_total",
+          "legendFormat": "Active Handles"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Active Resources",
+      "targets": [
+        {
+          "expr": "nodejs_active_resources_total",
+          "legendFormat": "Active Resources"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Node.js Version",
+      "targets": [
+        {
+          "expr": "nodejs_version_info",
+          "legendFormat": "v{{version}}"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 }
+    }
+  ],
+  "title": "NestJS / Node.js Metrics Dashboard",
+  "timezone": "browser",
+  "schemaVersion": 37,
+  "version": 1,
+  "editable": true
+}

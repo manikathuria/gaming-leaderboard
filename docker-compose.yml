@@ -1,0 +1,144 @@
+# services:
+#   postgres:
+#     image: postgres:15
+#     restart: always
+#     env_file:
+#       - .env
+#     environment:
+#       POSTGRES_DB: ${POSTGRES_DB}
+#       POSTGRES_USER: ${POSTGRES_USER}
+#       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#     ports:
+#       - '${POSTGRES_PORT}:5432'
+#     volumes:
+#       - pgdata:/var/lib/postgresql/data
+
+#   app:
+#     build: .
+#     container_name: leaderboard_app
+#     depends_on:
+#       - postgres
+#     volumes:
+#       - .:/usr/src/app
+#       - /usr/src/app/node_modules
+#     env_file:
+#       - .env
+#     environment:
+#       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}
+#       PORT: ${PORT}
+#       NODE_ENV: ${NODE_ENV}
+#     ports:
+#       - '${PORT}:${PORT}'
+#       - '${DEBUG_PORT}:9229'
+#     command: npm run start:debug
+
+#   prometheus:
+#     image: prom/prometheus:latest
+#     container_name: prometheus
+#     volumes:
+#       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+#     ports:
+#       - "${PROMETHEUS_PORT}:9090"
+#     depends_on:
+#       - app
+
+#   grafana:
+#     image: grafana/grafana:latest
+#     container_name: grafana
+#     environment:
+#       - GF_SECURITY_ADMIN_USER=admin
+#       - GF_SECURITY_ADMIN_PASSWORD=admin
+#     ports:
+#       - "${GRAFANA_PORT}:3000"   # ✅ host:container
+#     volumes:
+#       - ./grafana/provisioning:/etc/grafana/provisioning
+#       - ./grafana/dashboards:/etc/grafana/dashboards
+#     depends_on:
+#       - prometheus
+  
+#   migrate:
+#     build: .
+#     container_name: prisma_migrate
+#     depends_on:
+#       - postgres
+#       - app
+#     env_file:
+#       - .env
+#     command: sh -c "npx prisma generate && npx prisma migrate deploy"
+#     restart: "on-failure"  # retry if DB wasn’t ready yet
+
+# volumes:
+#   pgdata:
+
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  migrate:
+    build: .
+    container_name: prisma_migrate
+    depends_on:
+      - postgres
+    env_file:
+    - .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}
+    command: sh -c "npx prisma generate && npx prisma migrate deploy"
+    restart: "on-failure"
+
+  app:
+    build: .
+    container_name: leaderboard_app
+    depends_on:
+      - migrate   # ✅ wait for DB + migrations
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}
+      PORT: ${PORT}
+      NODE_ENV: ${NODE_ENV}
+    ports:
+      - "${PORT}:${PORT}"
+      - "${DEBUG_PORT}:9229"
+    command: npm run start:debug
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    depends_on:
+      - app
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/etc/grafana/dashboards
+    depends_on:
+      - prometheus
+
+volumes:
+  pgdata:
