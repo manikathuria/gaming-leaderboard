@@ -6,16 +6,20 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { LoggerModule } from 'src/common/logger/logger.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { LeaderboardGateway } from './leaderboard.gateway';
+import { RedisService } from 'src/common/redis/redis.service';
+import { QueueService } from 'src/common/queue/queue.service';
+import { LeaderboardQueueProcessor } from './leaderboard.queue.processor';
 
 @Module({
-  imports: [
-    PrismaModule, 
-    LoggerModule, 
-    GameSessionsModule,
-    forwardRef(() => AuthModule)
-  ],
+  imports: [PrismaModule, LoggerModule, GameSessionsModule, forwardRef(() => AuthModule)],
   controllers: [LeaderboardController],
-  providers: [LeaderboardService, LeaderboardGateway],
-  exports: [LeaderboardService, LeaderboardGateway]
+  providers: [
+    LeaderboardService,
+    LeaderboardGateway,
+    RedisService,
+    QueueService,
+    LeaderboardQueueProcessor,
+  ],
+  exports: [LeaderboardService, LeaderboardGateway],
 })
 export class LeaderboardModule {}

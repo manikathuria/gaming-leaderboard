@@ -105,7 +105,7 @@ submitBtn.onclick = async () => {
     });
     const payload = res.data;
 
-    submitMsg.textContent = `Submitted. Your rank: ${payload.rank}, total_score: ${payload.total_score}`;
+    submitMsg.textContent = `Submitted, total_score: ${payload.total_score}`;
     submitMsg.className = 'success';
   } catch (err) {
     submitMsg.textContent = err.message;
@@ -113,11 +113,11 @@ submitBtn.onclick = async () => {
   }
 };
 
-refreshBtn.onclick = async () => {
-  try {
-    const top = await api('/leaderboard/top?limit=10');
-    renderLeaderboard(top);
-  } catch (err) {
-    alert(err.message);
-  }
-};
+// refreshBtn.onclick = async () => {
+//   try {
+//     const top = await api('/leaderboard/top?limit=10');
+//     renderLeaderboard(top);
+//   } catch (err) {
+//     alert(err.message);
+//   }
+// };

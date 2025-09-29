@@ -6,16 +6,16 @@ describe('LeaderboardController', () => {
   let controller: LeaderboardController;
   let service: LeaderboardService;
 
-  const mockService = {
-    submitScore: jest.fn(),
-    getTop: jest.fn(),
-    getPlayerRank: jest.fn(),
+  const mockLeaderboardService = {
+    submitScore: jest.fn().mockResolvedValue({ user_id: 1, total_score: 100, rank: 1 }),
+    getTop: jest.fn().mockResolvedValue([{ user_id: 1, total_score: 100, rank: 1 }]),
+    getPlayerRank: jest.fn().mockResolvedValue({ user_id: 1, total_score: 100, rank: 1 }),
   };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [LeaderboardController],
-      providers: [{ provide: LeaderboardService, useValue: mockService }],
+      providers: [{ provide: LeaderboardService, useValue: mockLeaderboardService }],
     }).compile();
 
     controller = module.get<LeaderboardController>(LeaderboardController);
@@ -27,18 +27,22 @@ describe('LeaderboardController', () => {
   });
 
   it('should submit score', async () => {
-    mockService.submitScore.mockResolvedValue({ message: 'Score submitted' });
-    const result = await controller.submitScore({ user_id: 1, score: 50, game_mode: 'classic' });
-    expect(result).toEqual({ message: 'Score submitted' });
+    const mockReq: any = { user: { userId: 1 } }; // simulate request with JWT user
+    const dto = { score: 50 }; // dto only needs score (userId comes from req.user)
+
+    const result = await controller.submitScore(mockReq, dto);
+
+    expect(service.submitScore).toHaveBeenCalledWith(1, 50, undefined); // userId, score, game_mode
+    expect(result).toEqual({ user_id: 1, total_score: 100, rank: 1 });
   });
 
-  it('should get top players', async () => {
-    mockService.getTop.mockResolvedValue([{ userId: 1, total_score: 200 }]);
-    expect(await controller.getTop()).toEqual([{ userId: 1, total_score: 200 }]);
+  it('should return top players', async () => {
+    const result = await controller.getTop();
+    expect(result[0].user_id).toBe(1);
   });
 
-  it('should get player rank', async () => {
-    mockService.getPlayerRank.mockResolvedValue({ userId: 1, rank: 1 });
-    expect(await controller.getRank('1')).toEqual({ userId: 1, rank: 1 });
+  it('should return player rank', async () => {
+    const result = await controller.getRank('user_1');
+    expect(result.user_id).toBe(1);
   });
 });

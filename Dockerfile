@@ -1,5 +1,9 @@
 FROM node:20-alpine
 
+# Install PostgreSQL client (use apk instead of apt-get)
+RUN apk add --no-cache postgresql-client
+
+
 WORKDIR /usr/src/app
 
 # Install deps

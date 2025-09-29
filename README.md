@@ -1,53 +1,49 @@
 # Gaming Leaderboard API
 
-A **NestJS-based gaming leaderboard system** with **Prisma ORM**, **PostgreSQL**, and **Prometheus + Grafana monitoring**.
-Supports score submissions, dynamic ranking, and top leaderboard queries — designed to scale up to millions of users.
+A **NestJS-based gaming leaderboard system** with **Prisma ORM**, **Redis**, **BullMQ**, **PostgreSQL**, and **New Relic monitoring**.
+Supports score submissions, dynamic ranking, and top leaderboard queries — designed to scale up to millions of users. Following is the arch design for better understanding.
+
+![alt text](arch.png)
 
 ---
 
 ## 📑 Features
 
-* **Users**
+- **Users**
+  - Register new users (unique usernames).
+  - CRUD operations.
 
-  * Register new users (unique usernames).
-  * CRUD operations.
+- **Game Sessions**
+  - Store each user’s score submissions.
+  - Indexed for performance (user_id, timestamp).
 
-* **Game Sessions**
+- **Leaderboard**
+  - Submit score → leaderboard auto-updates.
+  - Fetch top 10 users by total score.
+  - Get a specific user’s rank and total score.
+  - Scalable rank calculation using **Postgres window functions**.
 
-  * Store each user’s score submissions.
-  * Indexed for performance (user_id, timestamp).
-
-* **Leaderboard**
-
-  * Submit score → leaderboard auto-updates.
-  * Fetch top 10 users by total score.
-  * Get a specific user’s rank and total score.
-  * Scalable rank calculation using **Postgres window functions**.
-
-* **Monitoring & Logging**
-
-  * Structured logs with **Winston logger**.
-  * API-level request/response logging.
-  * Metrics exposed via `/metrics` for Prometheus.
-  * Pre-provisioned Grafana dashboards.
-
-* **Developer Experience**
-
-  * Swagger docs at `/docs`.
-  * Prettier + ESLint.
-  * Containerization.
+- **Monitoring & Logging**
+  - Structured logs with **Winston logger**.
+  - API-level request/response logging.
+  - Metrics exposed via NewRelic.
+  
+- **Developer Experience**
+  - Swagger docs at `/docs`.
+  - Prettier + ESLint.
+  - Containerization.
 
 ---
 
 ## 📂 Tech Stack
 
-* **Backend Framework**: [NestJS](https://nestjs.com/)
-* **Database**: PostgreSQL with [Prisma ORM](https://www.prisma.io/)
-* **Monitoring**: Prometheus + Grafana
-* **Containerization**: Docker & Docker Compose
-* **Logging**: Winston (JSON structured logs)
-* **Validation**: class-validator + DTOs
-* **API Docs**: Swagger
+- **Backend Framework**: [NestJS](https://nestjs.com/)
+- **Database**: PostgreSQL with [Prisma ORM](https://www.prisma.io/)
+- **Monitoring**: Prometheus + Grafana
+- **Containerization**: Docker & Docker Compose
+- **Logging**: Winston (JSON structured logs)
+- **Validation**: class-validator + DTOs
+- **API Docs**: Swagger
 
 ---
 
@@ -85,15 +81,16 @@ GRAFANA_PORT=3001
 ### 3️⃣ Run with Docker Compose
 
 ```bash
-docker compose up --build
+chmod +x ./bin/build-and-run.sh
+./bin/build-and-run.sh
 ```
 
 This will start:
 
-* `leaderboard_app` (NestJS API at `http://localhost:3002`)
-* `postgres` (database)
-* `prometheus` (metrics at `http://localhost:9090`)
-* `grafana` (dashboards at `http://localhost:3001`)
+- `leaderboard_app` (NestJS API at `http://localhost:3002`)
+- `postgres` (database)
+- `redis` (cache)
+- `bullqueue` (queue)
 
 ---
 
@@ -101,39 +98,20 @@ This will start:
 
 ### Users
 
-* `POST /api/v1/users` → create user
-* `GET /api/v1/users` → list users
-* `GET /api/v1/users/:id` → get user by ID
+- `POST /api/v1/users` → create user
+- `GET /api/v1/users` → list users
+- `GET /api/v1/users/:id` → get user by ID
 
 ### Leaderboard
 
-* `POST /api/v1/leaderboard/submit`
+- `POST /api/v1/leaderboard/submit`
   Submit a score for a user. Returns updated score and rank.
 
-* `GET /api/v1/leaderboard/top?limit=10`
+- `GET /api/v1/leaderboard/top?limit=10`
   Fetch top N players (default 10).
 
-* `GET /api/v1/leaderboard/rank/:user_id`
+- `GET /api/v1/leaderboard/rank/:user_id`
   Fetch rank and score for a specific user.
-
----
-
-## 📊 Monitoring & Metrics
-
-* **Prometheus** scrapes metrics from:
-
-  ```
-  http://localhost:3002/metrics
-  ```
-
-* **Grafana** available at:
-
-  ```
-  http://localhost:3001
-  ```
-
-  Login → `admin/admin`.
-  Pre-provisioned dashboards: Node.js heap, GC, handles, active resources, request traffic.
 
 ---
 
@@ -184,8 +162,5 @@ output/demo.txt
 
 ## 🚀 Future Enhancements
 
-* [ ] Redis cache for faster leaderboard lookups.
-* [ ] WebSocket updates for real-time rank changes.
-* [ ] Multi-game support.
-* [ ] Horizontal scaling (Kubernetes).
-
+- [ ] Multi-game support.
+- [ ] Horizontal scaling (Kubernetes).

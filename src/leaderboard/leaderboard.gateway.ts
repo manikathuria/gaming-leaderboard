@@ -25,7 +25,6 @@ export class LeaderboardGateway implements OnGatewayConnection, OnGatewayDisconn
   ) {}
 
   async handleConnection(client: Socket) {
-    this.logger.log("handleconnection start")
     try {
       const token = client.handshake.auth?.token;
       if (!token) {

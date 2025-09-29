@@ -16,7 +16,6 @@ import { join } from 'path';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
-
 @Module({
   imports: [
     // load environment variables
@@ -32,9 +31,10 @@ import { APP_GUARD } from '@nestjs/core';
       throttlers: [
         {
           ttl: 60_000, // in ms (1 minute)
-          limit: 30,   // 30 requests per minute
+          limit: 200, // 200 requests per minute
         },
-      ]}),
+      ],
+    }),
     UsersModule,
     GameSessionsModule,
     LeaderboardModule,

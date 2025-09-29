@@ -11,7 +11,7 @@ import {
 import { LeaderboardService } from './leaderboard.service';
 import { SubmitScoreDto } from './dto/submit-score.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('leaderboard')
 @Controller({
