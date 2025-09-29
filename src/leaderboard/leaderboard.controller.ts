@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UseGuards, Req } from '@nestjs/common';
 import { LeaderboardService } from './leaderboard.service';
 import { SubmitScoreDto } from './dto/submit-score.dto';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('leaderboard')
 @Controller({
@@ -12,9 +13,13 @@ export class LeaderboardController {
   constructor(private readonly svc: LeaderboardService) {}
 
   @Post('submit')
-  @ApiOperation({ summary: 'Submit a score' })
-  submitScore(@Body() dto: SubmitScoreDto) {
-    return this.svc.submitScore(dto.userId, dto.score, dto.gameMode);
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Submit score (JWT protected). Only logged-in user can submit their own score.' })
+  submitScore(@Req() req: Request, @Body() dto: SubmitScoreDto) {
+    const userId = (req as any).user.userId;
+    console.log(`user object - ${userId}`);
+    return this.svc.submitScore(userId, dto.score, dto.gameMode);
   }
 
   @Get('top')

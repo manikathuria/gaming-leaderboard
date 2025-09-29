@@ -48,6 +48,7 @@ async function bootstrap() {
     .setTitle('Gaming Leaderboard API')
     .setDescription('APIs for gaming leaderboard')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/docs', app, document);

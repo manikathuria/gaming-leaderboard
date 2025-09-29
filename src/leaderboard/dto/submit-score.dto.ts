@@ -1,8 +1,6 @@
 import { IsInt, Min } from 'class-validator';
 
 export class SubmitScoreDto {
-  @IsInt()
-  userId: number;
 
   @IsInt()
   @Min(0)

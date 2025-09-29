@@ -10,6 +10,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { NewRelicMiddleware } from './common/middleware/newrelic.middleware';
+import { AuthModule } from './auth/auth.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -18,11 +21,16 @@ import { NewRelicMiddleware } from './common/middleware/newrelic.middleware';
       isGlobal: true,
       load: [configuration],
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // put demo.html in /public
+      serveRoot: '/', // serve at '/'
+    }),
     UsersModule,
     GameSessionsModule,
     LeaderboardModule,
     LoggerModule,
     PrismaModule,
+    AuthModule,
   ],
   providers: [
     PrismaService,

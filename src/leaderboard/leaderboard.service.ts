@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WinstonLogger } from '../common/logger/winston-logger.service';
 import { GameSessionsService } from '../game-sessions/game-sessions.service';
 import { CreateGameSessionDto } from '../game-sessions/dto/create-game-session.dto';
+import { LeaderboardGateway } from './leaderboard.gateway';
 
 @Injectable()
 export class LeaderboardService {
@@ -10,6 +11,8 @@ export class LeaderboardService {
     private prisma: PrismaService,
     private logger: WinstonLogger,
     private gameSessionsService: GameSessionsService,
+    @Inject(forwardRef(() => LeaderboardGateway))
+    private readonly leaderboardGateway: LeaderboardGateway,
   ) {}
 
   async submitScore(user_id: number, score: number, game_mode = 'default') {
@@ -33,6 +36,12 @@ export class LeaderboardService {
         create: { userId: user_id, total_score: score },
         update: { total_score: { increment: score } },
       });
+
+      try {
+        await this.leaderboardGateway.broadcastTop(10);
+      } catch (e) {
+        this.logger.warn('Failed to broadcast leaderboard update', e);
+      }
 
       return await this.getPlayerRank(user_id);
     } catch (error) {

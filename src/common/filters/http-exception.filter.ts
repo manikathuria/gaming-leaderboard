@@ -22,11 +22,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
       status,
       message,
     });
+    const msg = typeof message === "string" ? message : ((message as any)?.message || message);
 
     const apiResponse: ApiResponse<null> = {
       success: false,
       statusCode: status,
-      message,
+      message:  msg,
       timestamp: new Date().toISOString(),
     };
 

@@ -50,17 +50,6 @@
         }
       ],
       "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
-    },
-    {
-      "type": "timeseries",
-      "title": "Node.js Version",
-      "targets": [
-        {
-          "expr": "nodejs_version_info",
-          "legendFormat": "v{{version}}"
-        }
-      ],
-      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 }
     }
   ],
   "title": "NestJS / Node.js Metrics Dashboard",
