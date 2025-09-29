@@ -87,7 +87,7 @@ log ""
 
 # 2. Submit scores (with login + JWT)
 log "🎮 Logging in users and submitting scores..."
-for i in $(seq 1 10); do
+for i in $(seq 1 20); do
   USERNAME="user$i"
 
   # login to get token (demo password is always "password")

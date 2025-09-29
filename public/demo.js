@@ -103,8 +103,9 @@ submitBtn.onclick = async () => {
       method: 'POST',
       body: JSON.stringify({ score: sc }),
     });
+    const payload = res.data;
 
-    submitMsg.textContent = `Submitted. Your rank: ${res.rank}, total_score: ${res.total_score}`;
+    submitMsg.textContent = `Submitted. Your rank: ${payload.rank}, total_score: ${payload.total_score}`;
     submitMsg.className = 'success';
   } catch (err) {
     submitMsg.textContent = err.message;

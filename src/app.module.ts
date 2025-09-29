@@ -13,6 +13,9 @@ import { NewRelicMiddleware } from './common/middleware/newrelic.middleware';
 import { AuthModule } from './auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+
 
 @Module({
   imports: [
@@ -25,6 +28,13 @@ import { join } from 'path';
       rootPath: join(__dirname, '..', 'public'), // put demo.html in /public
       serveRoot: '/', // serve at '/'
     }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60_000, // in ms (1 minute)
+          limit: 30,   // 30 requests per minute
+        },
+      ]}),
     UsersModule,
     GameSessionsModule,
     LeaderboardModule,
@@ -35,6 +45,10 @@ import { join } from 'path';
   providers: [
     PrismaService,
     WinstonLogger, // make Winston logger available everywhere
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard, // 👈 enables global throttling
+    },
   ],
 })
 export class AppModule {

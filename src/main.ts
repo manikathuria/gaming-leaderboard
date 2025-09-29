@@ -10,6 +10,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { VersioningType } from '@nestjs/common';
 import { WinstonLogger } from './common/logger/winston-logger.service';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { ipRateLimit } from './common/middleware/ip-rate-limit.middleware';
 
 async function bootstrap() {
   // bootstrap app with bufferLogs so Winston can capture early logs
@@ -62,6 +63,8 @@ async function bootstrap() {
     res.set('Content-Type', register.contentType);
     res.end(await register.metrics());
   });
+  app.use(ipRateLimit);
+
 
   // Start app
   const port = process.env.PORT || 3000;

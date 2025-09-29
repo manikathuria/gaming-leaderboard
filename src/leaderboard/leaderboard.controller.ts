@@ -1,4 +1,13 @@
-import { Controller, Post, Body, Get, Param, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  UseGuards,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { LeaderboardService } from './leaderboard.service';
 import { SubmitScoreDto } from './dto/submit-score.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
@@ -15,10 +24,15 @@ export class LeaderboardController {
   @Post('submit')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Submit score (JWT protected). Only logged-in user can submit their own score.' })
+  @ApiOperation({
+    summary: 'Submit score (JWT protected). Only logged-in user can submit their own score.',
+  })
   submitScore(@Req() req: Request, @Body() dto: SubmitScoreDto) {
     const userId = (req as any).user.userId;
-    console.log(`user object - ${userId}`);
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token - missing user id');
+    }
+
     return this.svc.submitScore(userId, dto.score, dto.gameMode);
   }
 
